@@ -1,19 +1,24 @@
 use std::collections::HashMap;
 
+use content::races;
 use cursive::{
     align::HAlign,
     event,
     menu,
     traits::{Nameable, Resizable},
     views::{Dialog, EditView, ListView, SelectView, SliderView, TextView},
-    Cursive, With,
+    Cursive, With, view::IntoBoxedView,
 };
+use system::Creature;
 
 mod system;
+mod content;
+mod pages;
 
-enum MainMenuItems {
+enum Page {
     Quit,
     NewGame,
+    MainMenu,
 }
 
 enum GameTabs {
@@ -22,8 +27,35 @@ enum GameTabs {
     Character,
 }
 
-fn start_new_game(s: &mut Cursive) {
-    s.add_layer(Dialog::around(TextView::new("New game started")).button("Quit", |s| s.quit()));
+#[derive(Default)]
+struct GameState {
+    hero: Creature,
+}
+
+fn main_menu_page(s: &mut Cursive) {
+    let mut menu_select = SelectView::new().h_align(HAlign::Center);
+    menu_select.add_item(" Новая игра ", Page::NewGame);
+    menu_select.add_item(" Выход ", Page::Quit);
+    menu_select.set_on_submit(|s, item| open_page(s, item));
+    s.add_layer(menu_select);
+}
+
+fn open_page(s: &mut Cursive, page: &Page) {
+    s.pop_layer();
+
+    match page {
+        Page::Quit => s.quit(),
+        Page::NewGame => pages::new_game::page(s),
+        Page::MainMenu => main_menu_page(s),
+    };
+}
+
+fn switch_view<T>(s: &mut Cursive, view: T)
+where
+    T: IntoBoxedView
+{
+    s.pop_layer();
+    s.add_layer(view)
 }
 
 fn main() {
@@ -33,20 +65,9 @@ fn main() {
 
     siv.add_global_callback('q', |s| s.quit());
 
-    let mut time_select = SelectView::new().h_align(HAlign::Center);
-    time_select.add_item(" New game ", MainMenuItems::NewGame);
-    time_select.add_item(" Exit ", MainMenuItems::Quit);
+    siv.set_user_data(GameState::default());
 
-    time_select.set_on_submit(|s, item| {
-        s.pop_layer();
-        
-        match item {
-            MainMenuItems::NewGame => start_new_game(s),
-            MainMenuItems::Quit => s.quit(),
-        }
-    });
-
-    siv.add_layer(time_select);
+    open_page(&mut siv, &Page::MainMenu);
 
     siv.run();
 }

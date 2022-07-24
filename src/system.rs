@@ -1,25 +1,25 @@
-struct Attributes {
-    strength: i32,
-    dexterity: i32,
-    constitution: i32,
-    intelligence: i32,
-    wisdom: i32,
-    charisma: i32,
+pub enum Attribute {
+    Strength,
+    Dexterity,
+    Constitution,
+    Intelligence,
+    Wisdom,
+    Charisma,
+    None,
+}
+
+#[derive(Default, Clone)]
+pub struct Attributes {
+    pub strength: i8,
+    pub dexterity: i8,
+    pub constitution: i8,
+    pub intelligence: i8,
+    pub wisdom: i8,
+    pub charisma: i8,
 }
 
 impl Attributes {
-    fn new() -> Attributes {
-        Attributes {
-            strength: 0,
-            dexterity: 0,
-            constitution: 0,
-            intelligence: 0,
-            wisdom: 0,
-            charisma: 0,
-        }
-    }
-
-    fn from_tuple(tuple: (i32, i32, i32, i32, i32, i32)) -> Attributes {
+    pub fn from_tuple(tuple: (i8, i8, i8, i8, i8, i8)) -> Attributes {
         Attributes {
             strength: tuple.0,
             dexterity: tuple.1,
@@ -30,7 +30,7 @@ impl Attributes {
         }
     }
 
-    fn add(&mut self, other: Attributes) {
+    pub fn add(&mut self, other: Attributes) {
         self.strength += other.strength;
         self.dexterity += other.dexterity;
         self.constitution += other.constitution;
@@ -39,7 +39,7 @@ impl Attributes {
         self.charisma += other.charisma;
     }
 
-    fn add_tuple(&mut self, tuple: (i32, i32, i32, i32, i32, i32)) {
+    pub fn add_tuple(&mut self, tuple: (i8, i8, i8, i8, i8, i8)) {
         self.strength += tuple.0;
         self.dexterity += tuple.1;
         self.constitution += tuple.2;
@@ -47,50 +47,104 @@ impl Attributes {
         self.wisdom += tuple.4;
         self.charisma += tuple.5;
     }
-}
 
-struct Player {
-    name: String,
-    level: u32,
-    experience: u32,
-    health: u32,
-    max_health: u32,
-    mana: u32,
-    max_mana: u32,
-    coins: u32,
-    inventory: Vec<String>,
-    equipped: Vec<String>,
-    attributes: Attributes,
-    upgrade_points: u32,
-}
-
-impl Player {
-    fn new() -> Player {
-        Player {
-            name: String::new(),
-            level: 0,
-            experience: 0,
-            health: 0,
-            max_health: 0,
-            mana: 0,
-            max_mana: 0,
-            coins: 0,
-            inventory: Vec::new(),
-            equipped: Vec::new(),
-            attributes: Attributes::new(),
-            upgrade_points: 0,
+    pub fn get(&self, attribute: Attribute) -> i8 {
+        match attribute {
+            Attribute::Strength => self.strength,
+            Attribute::Dexterity => self.dexterity,
+            Attribute::Constitution => self.constitution,
+            Attribute::Intelligence => self.intelligence,
+            Attribute::Wisdom => self.wisdom,
+            Attribute::Charisma => self.charisma,
+            Attribute::None => 0,
         }
     }
+}
 
-    fn add_attributes(&mut self, attributes: Attributes) {
+pub enum ItemKind {
+    MeleeWeapon,
+    RangedWeapon,
+    MagicWeapon,
+    Ammunition,
+    Armor,
+    Shield,
+    Clothes,
+    Ring,
+    Amulet,
+    Potion,
+    Scroll,
+    Food,
+    Book,
+    Recipe,
+    Ingredient,
+    Material,
+    Misc,
+}
+
+pub enum EffectValue {
+    None,
+    Health(i8),
+    MaxHealth(i8),
+    Mana(i8),
+    MaxMana(i8),
+    Speed(i8),
+    Attributes(Attributes),
+    Defense(i8),
+}
+
+pub enum EffectTarget {
+    OnSelf,
+    Other,
+}
+
+pub struct Effect {
+    pub value: EffectValue,
+    pub duration: u16,
+    pub is_permanent: bool,
+    pub target: EffectTarget,
+}
+
+pub struct Item {
+    pub name: String,
+    pub description: String,
+    pub price: isize,
+    pub kind: ItemKind,
+    pub attributes: Attributes,
+    pub attribute: Attribute,
+    pub effects: Vec<Effect>,
+}
+
+#[derive(Default, Clone)]
+pub struct Creature {
+    pub name: String,
+    pub description: String,
+    pub creature_name: String, // race
+    pub creature_description: String, // race
+    pub level: usize,
+    pub experience: usize,
+    pub health: usize,
+    pub max_health: usize, // race
+    pub mana: usize,
+    pub max_mana: usize, // race
+    pub speed: usize, // race
+    pub defense: usize, // race
+    pub coins: usize,
+    pub inventory: Vec<String>,
+    pub equipped: Vec<String>,
+    pub attributes: Attributes, // race
+    pub upgrade_points: usize,
+}
+
+impl Creature {
+    pub fn add_attributes(&mut self, attributes: Attributes) {
         self.attributes.add(attributes);
     }
     
-    fn add_experience(&mut self, experience: u32) {
+    pub fn add_experience(&mut self, experience: usize) {
         self.experience += experience;
         let level_up_threshold = 10 + (self.level * 5);
 
-        if (self.experience >= level_up_threshold) {
+        if self.experience >= level_up_threshold {
             self.level += 1;
             self.upgrade_points += 2;
             self.experience -= level_up_threshold;
