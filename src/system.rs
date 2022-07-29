@@ -1,3 +1,4 @@
+#[derive(Clone)]
 pub enum Attribute {
     Strength,
     Dexterity,
@@ -61,6 +62,7 @@ impl Attributes {
     }
 }
 
+#[derive(Clone)]
 pub enum ItemKind {
     MeleeWeapon,
     RangedWeapon,
@@ -81,6 +83,7 @@ pub enum ItemKind {
     Misc,
 }
 
+#[derive(Clone)]
 pub enum EffectValue {
     None,
     Health(i8),
@@ -92,11 +95,13 @@ pub enum EffectValue {
     Defense(i8),
 }
 
+#[derive(Clone)]
 pub enum EffectTarget {
     OnSelf,
     Other,
 }
 
+#[derive(Clone)]
 pub struct Effect {
     pub value: EffectValue,
     pub duration: u16,
@@ -104,6 +109,7 @@ pub struct Effect {
     pub target: EffectTarget,
 }
 
+#[derive(Clone)]
 pub struct Item {
     pub name: String,
     pub description: String,
@@ -129,8 +135,8 @@ pub struct Creature {
     pub speed: usize, // race
     pub defense: usize, // race
     pub coins: usize,
-    pub inventory: Vec<String>,
-    pub equipped: Vec<String>,
+    pub inventory: Vec<Item>,
+    pub equipped: Vec<Item>,
     pub attributes: Attributes, // race
     pub upgrade_points: usize,
 }
