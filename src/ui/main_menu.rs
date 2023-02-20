@@ -1,21 +1,22 @@
-use crate::{app::App};
+use std::io::Stdout;
 
-use super::{Component, TEXT_FOCUS_COLOR, TEXT_PRIMARY_COLOR};
-use crossterm::{
-    Result, 
-    terminal::size, 
-    queue, 
-    cursor::MoveTo, 
-    style::{Stylize, Attribute, PrintStyledContent, Print},
-    event::{Event, KeyCode}
+use crate::{
+    lib::{draw_border, Component, Indents, Rect},
+    state::State,
 };
 
-const WIDTH: u16 = 30;
+use super::{PRIMARY_COLOR, SECONDARY_COLOR};
 
-const MENU_ITEMS: [&'static str; 2] = [
-    "Новая игра",
-    "Выход"
-];
+use crossterm::{
+    cursor::MoveTo,
+    event::{KeyCode, KeyEvent},
+    style::{Attribute, PrintStyledContent, Stylize},
+    QueueableCommand, Result,
+};
+
+const PREFIX_OFFSET: u16 = 2;
+
+const MENU_ITEMS: [&'static str; 3] = ["Загрузить", "Новая игра", "Выход"];
 
 #[derive(Default)]
 pub struct MainMenu {
@@ -24,61 +25,69 @@ pub struct MainMenu {
 
 impl MainMenu {
     fn up(&mut self) {
+        self.index = if self.index > 0 {
+            self.index - 1
+        } else {
+            (MENU_ITEMS.len() - 1) as u8
+        }
+    }
+
+    fn down(&mut self) {
         self.index = if self.index + 1 < MENU_ITEMS.len() as u8 {
             self.index + 1
         } else {
             0
         }
     }
-
-    fn down(&mut self) {
-        self.index = if self.index > 1 {
-            self.index - 1
-        } else {
-            (MENU_ITEMS.len() - 1) as u8
-        }
-    }
 }
 
-impl Component for MainMenu {
-    fn draw(&self, app: &mut App) -> Result<()> {
-        let (w, h) = size()?;
+impl Component<State> for MainMenu {
+    fn draw(&self, out: &mut Stdout, rect: &Rect, _: &State) -> Result<()> {
+        let (w, h) = rect.size();
 
-        let x = (w - WIDTH) / 2;
-        let y = (h - MENU_ITEMS.len() as u16) / 2;
-        let mut line = 0;
+        let content_w = MENU_ITEMS
+            .iter()
+            .map(|i| i.chars().count())
+            .max()
+            .unwrap_or(0) as u16
+            + PREFIX_OFFSET;
+        let content_h = MENU_ITEMS.len() as u16;
 
-        for item in MENU_ITEMS {
-            let offset: u16 = (WIDTH - item.chars().count() as u16) / 2;
-            let color = if line == self.index { TEXT_FOCUS_COLOR } else { TEXT_PRIMARY_COLOR };
+        let content_rect = Rect::new(
+            w / 2 - content_w / 2,
+            h / 2 - content_h / 2,
+            w / 2 + content_w / 2,
+            h / 2 + content_h / 2,
+        );
 
-            let styled = (item)
+        let border_rect = content_rect.with_margin(Indents::new(2, 3, 2, 2));
+
+        draw_border(out, border_rect)?;
+
+        for (i, item) in MENU_ITEMS.iter().enumerate() {
+            let (color, prefix) = if i as u8 == self.index {
+                (PRIMARY_COLOR, "> ")
+            } else {
+                (SECONDARY_COLOR, "  ")
+            };
+
+            let styled = format!("{}{}", prefix, item)
                 .with(color)
                 .attribute(Attribute::Bold);
 
-            queue!(
-                app.out,
-                MoveTo(x + offset, y + line as u16),
-                PrintStyledContent(styled),
-            )?;
-
-            line += 1;
+            out.queue(MoveTo(content_rect.x1, content_rect.y1 + i as u16))?;
+            out.queue(PrintStyledContent(styled))?;
         }
 
         Ok(())
     }
 
-    fn on_state_update(&mut self, app: &mut App) {
-        todo!()
-    }
-
-    fn on_terminal_event(&mut self, app: &mut App, event: Event) {
-        match event {
-            Event::Key(e) => {
-                if e.code == KeyCode::Up { self.up() }
-                if e.code == KeyCode::Down { self.down() }
-            },
-            _ => (),
+    fn key(&mut self, key: KeyEvent, _: &mut State) {
+        if key.code == KeyCode::Up {
+            self.up()
+        }
+        if key.code == KeyCode::Down {
+            self.down()
         }
     }
 }

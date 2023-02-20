@@ -1,42 +1,65 @@
-use std::{io::Write, time::Duration};
-
-use crossterm::{
-    event::{read, Event, KeyCode, poll}, Result, queue, terminal::{ClearType, Clear}, QueueableCommand,
+use std::{
+    io::{stdout, Write},
+    time::Duration,
 };
 
-use ui::{MainMenu, Component};
+use crossterm::{
+    event::{poll, read, Event, KeyCode},
+    terminal::{Clear, ClearType},
+    QueueableCommand, Result,
+};
 
+mod lib;
 mod state;
 mod ui;
-mod app;
+mod views;
+
+use lib::{Component, Rect, Terminal};
+use state::State;
+use views::MenuView;
 
 fn main() -> Result<()> {
-    let mut app = app::App::new();
-    app.enable_terminal()?;
+    let mut terminal = Terminal { out: stdout() };
+    let mut state = State::default();
+    let mut root: Box<dyn Component<State>> = Box::new(MenuView::new());
 
-    let mut root_component: Box<dyn Component> = Box::new(MainMenu::default());
-    
+    terminal.enable()?;
+
+    state.redraw();
+
     loop {
         if poll(Duration::from_millis(250))? {
             let e = read()?;
 
             match e {
-                Event::Key(event) => {
-                    if event.code == KeyCode::Esc {
+                Event::Key(key) => {
+                    if key.code == KeyCode::Esc {
                         break;
                     }
 
-                    root_component.on_terminal_event(&mut app, e)
-                },
-                _ => root_component.on_terminal_event(&mut app, e),
+                    root.key(key, &mut state);
+                    state.redraw();
+                }
+                Event::Resize(_, _) => {
+                    root.resize(Rect::full_terminal()?, &mut state);
+                    state.redraw();
+                }
+                Event::Mouse(_) => {}
             }
         };
 
-        app.out.queue(Clear(ClearType::All))?;
-        root_component.draw(&mut app)?;
-        app.out.flush()?;
+        if state.need_update {
+            root.update(&mut state);
+            state.redraw();
+        }
+
+        if state.need_redraw {
+            terminal.out.queue(Clear(ClearType::All))?;
+            root.draw(&mut terminal.out, &Rect::full_terminal()?, &state)?;
+            terminal.out.flush()?;
+        }
     }
 
-    app.disable_terminal()?;
+    terminal.disable()?;
     Ok(())
 }

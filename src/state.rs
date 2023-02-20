@@ -1,9 +1,16 @@
+#[derive(Default)]
 pub struct State {
-    // bottom_info: String,
+    pub need_redraw: bool,
+    pub need_update: bool,
+    pub bottom_info: Vec<String>,
 }
 
 impl State {
-    pub fn new() -> Self {
-        Self {  }
+    pub fn update(&mut self) {
+        self.need_update = true;
+    }
+
+    pub fn redraw(&mut self) {
+        self.need_redraw = true;
     }
 }
