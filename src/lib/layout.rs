@@ -1,4 +1,4 @@
-use crossterm::Result;
+use crossterm::{Result, terminal::size};
 
 pub struct Indents {
     pub top: u16,
@@ -30,7 +30,7 @@ pub enum Alignment {
     BottomRight,
 }
 
-/// (widtop, height)
+/// (width, height)
 pub type Size = (u16, u16);
 
 #[derive(Clone)]

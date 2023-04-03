@@ -1,7 +1,7 @@
-use crossterm::event::{KeyEvent, KeyCode};
+use crossterm::event::KeyEvent;
 
 use crate::{
-    lib::{BaseComponent, Component, Indents, List, Rect, Text},
+    lib::{Component, Indents, List, Text, Printer},
     state::State,
 };
 
@@ -22,8 +22,8 @@ impl MenuView {
     }
 }
 
-impl Component<State> for MenuView {
-    fn draw(&self, out: &mut std::io::Stdout, rect: &Rect, state: &State) -> crossterm::Result<()> {
+impl Component for MenuView {
+    fn draw(&self, printer: Printer, app: &mut app) -> crossterm::Result<()> {
         let info_height = self.bottom_info.height();
         let menu_rect = rect.with_margin(Indents::new(0, 0, info_height, 0));
         let info_rect = rect.with_margin(Indents::new(info_height, 0, 0, 0));

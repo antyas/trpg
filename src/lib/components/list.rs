@@ -1,13 +1,12 @@
-use std::io::Stdout;
-
-use crate::lib::{BaseComponent, Rect, Size, Style};
+use crate::lib::{Component, Size, Style, printer, App};
 
 use crossterm::{
     cursor::MoveTo,
     event::{KeyCode, KeyEvent},
     style::{Attribute, PrintStyledContent, Stylize},
-    QueueableCommand, Result,
+    Result,
 };
+use printer::Printer;
 
 const PREFIX_OFFSET: u16 = 2;
 
@@ -60,46 +59,25 @@ impl List {
     }
 }
 
-impl BaseComponent<ListProps, usize> for List {
-    fn draw(&self, out: &mut Stdout, rect: &Rect) -> Result<()> {
-        let (w, h) = rect.size();
-
+impl Component for List {
+    fn draw(&self, printer: Printer, app: &dyn App) -> Result<()> {
         for (i, item) in self.items.iter().enumerate() {
-            let (color, prefix) = if i == self.index {
-                (self.active_style.fg, "> ")
-            } else {
-                (self.style.fg, "  ")
-            };
+            let prefix = if i == self.index { "> " } else { "  " };
 
-            let styled = format!("{}{}", prefix, item)
-                .with(color)
-                .attribute(Attribute::Bold);
+            let string = format!("{}{}", prefix, item);
 
-            out.queue(MoveTo(rect.x1, rect.y1 + i as u16))?;
-            out.queue(PrintStyledContent(styled))?;
+            printer.print(&string, 0, i as u16)?;
         }
 
         Ok(())
     }
 
-    fn update(&mut self, props: ListProps) -> usize {
-        self.items = props.items;
-
-        if self.index >= self.items.len() {
-            self.index = 0;
-        }
-
-        self.index
-    }
-
-    fn key(&mut self, key: KeyEvent) -> usize {
+    fn on_key(&mut self, key: KeyEvent) {
         if key.code == KeyCode::Up {
             self.up()
         };
         if key.code == KeyCode::Down {
             self.down()
         };
-
-        self.index
     }
 }
