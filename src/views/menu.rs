@@ -1,9 +1,6 @@
 use crossterm::event::KeyEvent;
 
-use crate::{
-    lib::{Component, Indents, List, Text, Printer},
-    state::State,
-};
+use crate::lib::{Component, Indents, List, Text, Printer, Style};
 
 pub struct MenuView {
     main_menu: List,
@@ -23,17 +20,21 @@ impl MenuView {
 }
 
 impl Component for MenuView {
-    fn draw(&self, printer: Printer, app: &mut app) -> crossterm::Result<()> {
+    fn draw(&self, printer: &Printer) -> crossterm::Result<()> {
         let info_height = self.bottom_info.height();
-        let menu_rect = rect.with_margin(Indents::new(0, 0, info_height, 0));
-        let info_rect = rect.with_margin(Indents::new(info_height, 0, 0, 0));
+        let menu_rect = printer.rect.with_margin(Indents::new(0, 0, info_height, 0));
+        let info_rect = printer.rect.with_margin(Indents::new(info_height, 0, 0, 0));
 
-        self.main_menu.draw(out, &menu_rect)?;
-        self.bottom_info.draw(out, &info_rect)?;
+        let menu_printer = Printer::new(menu_rect, Style::default());
+        self.main_menu.draw(&menu_printer)?;
+
+        let info_printer = Printer::new(info_rect, Style::default());
+        self.bottom_info.draw(&info_printer)?;
+
         Ok(())
     }
 
-    fn key(&mut self, key: KeyEvent, _: &mut State) {
-        self.main_menu.key(key);
+    fn on_key(&mut self, key: KeyEvent) {
+        self.main_menu.on_key(key);
     }
 }

@@ -27,7 +27,7 @@ impl Default for Style {
 impl Style {
     pub fn apply_colors(&self) -> Result<()> {
         queue!(
-            self.out,
+            &self.out,
             SetForegroundColor(self.fg),
             SetBackgroundColor(self.bg),
             SetAttribute(self.attribute),
@@ -35,6 +35,6 @@ impl Style {
     }
 
     pub fn reset_colors(&self) -> Result<()> {
-        queue!(self.out, ResetColor, SetAttribute(Attribute::Reset))
+        queue!(&self.out, ResetColor, SetAttribute(Attribute::Reset))
     }
 }

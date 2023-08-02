@@ -1,4 +1,4 @@
-use crossterm::{Result, terminal::size};
+use crossterm::Result;
 
 pub struct Indents {
     pub top: u16,
@@ -57,19 +57,19 @@ impl Rect {
 
     pub fn with_margin(&self, margin: Indents) -> Self {
         Self {
-            x1: self.x1 - margin.left,
-            x2: self.x2 + margin.right,
-            y1: self.y1 - margin.top,
-            y2: self.y2 + margin.bottom,
+            x1: self.x1.saturating_sub(margin.left),
+            x2: self.x2.saturating_add(margin.right),
+            y1: self.y1.saturating_sub(margin.top),
+            y2: self.y2.saturating_add(margin.bottom),
         }
     }
 
     pub fn with_padding(&self, padding: Indents) -> Self {
         Self {
-            x1: self.x1 + padding.left,
-            x2: self.x2 - padding.right,
-            y1: self.y1 + padding.top,
-            y2: self.y2 - padding.bottom,
+            x1: self.x1.saturating_add(padding.left),
+            x2: self.x2.saturating_sub(padding.right),
+            y1: self.y1.saturating_add(padding.top),
+            y2: self.y2.saturating_sub(padding.bottom),
         }
     }
 

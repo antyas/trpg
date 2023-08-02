@@ -1,14 +1,13 @@
+pub mod terminal;
 mod components;
 mod layout;
 mod style;
-mod terminal;
 mod traits;
 mod printer;
 
 pub use components::*;
 pub use layout::*;
 pub use style::*;
-pub use terminal::*;
 pub use traits::*;
 pub use printer::*;
 

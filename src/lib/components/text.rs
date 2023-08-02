@@ -38,7 +38,7 @@ impl Text {
 }
 
 impl Component for Text {
-    fn draw(&self, printer: Printer) -> Result<()> {
+    fn draw(&self, printer: &Printer) -> Result<()> {
         self.rows
             .iter()
             .enumerate()

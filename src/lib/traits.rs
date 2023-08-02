@@ -8,7 +8,7 @@ pub enum AppEvent {
 use super::Printer;
 
 pub trait Component {
-    fn draw(&self, printer: Printer) -> Result<()> {
+    fn draw(&self, printer: &Printer) -> Result<()> {
         Ok(())
     }
 

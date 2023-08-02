@@ -1,41 +1,36 @@
-use std::io::{Stdout, stdout};
+use std::io::{stdout, Write};
 
 use crossterm::{
     cursor::{Hide, Show},
-    terminal::{size, disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
-    ExecutableCommand, Result,
+    terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen, Clear, ClearType},
+    ExecutableCommand,
+    Result,
 };
 
-use super::Size;
-
-pub struct Terminal {
-    pub out: Stdout,
-    pub size: Size,
+pub fn enable() -> Result<()> {
+    let mut out = stdout();
+    enable_raw_mode()?;
+    out.execute(EnterAlternateScreen)?;
+    out.execute(Hide)?;
+    Ok(())
 }
 
-impl Terminal {
-    pub fn new() -> Result<Self> {
-        Ok(Self {
-            out: stdout(),
-            size: size()?,
-        })
-    }
+pub fn disable() -> Result<()> {
+    let mut out = stdout();
+    out.execute(Show)?;
+    out.execute(LeaveAlternateScreen)?;
+    disable_raw_mode()?;
+    Ok(())
+}
 
-    pub fn enable(&mut self) -> Result<()> {
-        enable_raw_mode()?;
-        self.out.execute(EnterAlternateScreen)?;
-        self.out.execute(Hide)?;
-        Ok(())
-    }
+pub fn clear() -> Result<()> {
+    let mut out = stdout();
+    out.execute(Clear(ClearType::All))?;
+    Ok(())
+}
 
-    pub fn disable(&mut self) -> Result<()> {
-        self.out.execute(Show)?;
-        self.out.execute(LeaveAlternateScreen)?;
-        disable_raw_mode()?;
-        Ok(())
-    }
-
-    pub fn on_resize(&mut self) -> Result<()> {
-        Ok(self.size = size()?)
-    }
+pub fn flush() -> Result<()> {
+    let mut out = stdout();
+    out.flush()?;
+    Ok(())
 }

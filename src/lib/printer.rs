@@ -26,7 +26,7 @@ impl Printer {
         self.style.apply_colors()?;
 
         queue!(
-            self.out,
+            &self.out,
             MoveTo(x, y),
             Print(text),
         );
@@ -41,7 +41,7 @@ impl Printer {
 
         for x in x1 + 1..x2 {
             queue!(
-                self.out,
+                &self.out,
                 MoveTo(x, y),
                 Print('─'),
             );
@@ -56,7 +56,7 @@ impl Printer {
         self.style.apply_colors()?;
 
         queue!(
-            self.out,
+            &self.out,
 
             MoveTo(rect.x1, rect.y1),
             Print('┌'),
@@ -73,7 +73,7 @@ impl Printer {
     
         for x in rect.x1 + 1..rect.x2 {
             queue!(
-                self.out,
+                &self.out,
                 MoveTo(x, rect.y1),
                 Print('─'),
                 MoveTo(x, rect.y2),
@@ -83,7 +83,7 @@ impl Printer {
     
         for y in rect.y1 + 1..rect.y2 {
             queue!(
-                self.out,
+                &self.out,
                 MoveTo(rect.x1, y),
                 Print('│'),
                 MoveTo(rect.x2, y),

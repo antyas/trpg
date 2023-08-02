@@ -1,9 +1,7 @@
-use crate::lib::{Component, Size, Style, printer, App};
+use crate::lib::{Component, Size, Style, printer};
 
 use crossterm::{
-    cursor::MoveTo,
     event::{KeyCode, KeyEvent},
-    style::{Attribute, PrintStyledContent, Stylize},
     Result,
 };
 use printer::Printer;
@@ -60,7 +58,7 @@ impl List {
 }
 
 impl Component for List {
-    fn draw(&self, printer: Printer, app: &dyn App) -> Result<()> {
+    fn draw(&self, printer: &Printer) -> Result<()> {
         for (i, item) in self.items.iter().enumerate() {
             let prefix = if i == self.index { "> " } else { "  " };
 
