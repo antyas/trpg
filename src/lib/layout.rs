@@ -47,7 +47,7 @@ impl Rect {
     }
 
     pub fn size(&self) -> Size {
-        (self.x2 - self.x1, self.y2 - self.y1)
+        (self.x2.saturating_sub(self.x1), self.y2.saturating_sub(self.y1))
     }
 
     pub fn full_terminal() -> Result<Self> {
@@ -76,7 +76,7 @@ impl Rect {
     pub fn with_align(&self, position: Alignment, new_size: Size) -> Self {
         let (nw, nh) = new_size;
         let (sw, sh) = self.size();
-        let (offset_w, offset_h) = (sw - nw, sh - nh);
+        let (offset_w, offset_h) = (sw.saturating_sub(nw), sh.saturating_sub(nh));
         let (half_w, half_h) = (offset_w / 2, offset_h / 2);
         let (left, right) = (offset_w - half_w, half_w);
         let (top, bottom) = (offset_h - half_h, half_h);

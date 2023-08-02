@@ -39,7 +39,7 @@ impl Text {
 
 impl Component for Text {
     fn draw(&self, printer: &Printer) -> Result<()> {
-        self.rows
+        let _ = self.rows
             .iter()
             .enumerate()
             .map(|(i, row)| printer.print(row, 0, i as u16));

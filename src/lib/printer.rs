@@ -29,7 +29,7 @@ impl Printer {
             &self.out,
             MoveTo(x, y),
             Print(text),
-        );
+        )?;
 
         self.style.reset_colors()?;
 
@@ -44,7 +44,7 @@ impl Printer {
                 &self.out,
                 MoveTo(x, y),
                 Print('─'),
-            );
+            )?;
         }
 
         self.style.reset_colors()?;
@@ -69,7 +69,7 @@ impl Printer {
 
             MoveTo(rect.x1, rect.y2),
             Print('└'),
-        );
+        )?;
     
         for x in rect.x1 + 1..rect.x2 {
             queue!(
@@ -78,7 +78,7 @@ impl Printer {
                 Print('─'),
                 MoveTo(x, rect.y2),
                 Print('─'),
-            );
+            )?;
         }
     
         for y in rect.y1 + 1..rect.y2 {
@@ -88,7 +88,7 @@ impl Printer {
                 Print('│'),
                 MoveTo(rect.x2, y),
                 Print('│'),
-            );
+            )?;
         }
 
         self.style.reset_colors()?;
